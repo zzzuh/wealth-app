@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { input, buttonPrimary, label } from "@/lib/ui";
 
 export default function CheckingBalanceForm() {
   const router = useRouter();
@@ -25,22 +26,18 @@ export default function CheckingBalanceForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex items-end gap-2">
-      <div className="flex flex-col gap-1">
-        <label className="text-xs font-medium text-slate-500">Update balance</label>
+      <div className="flex flex-col gap-1.5">
+        <label className={label}>Update balance</label>
         <input
           required
           type="number"
           step="0.01"
           value={balance}
           onChange={(e) => setBalance(e.target.value)}
-          className="w-32 rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+          className={`w-32 ${input}`}
         />
       </div>
-      <button
-        type="submit"
-        disabled={submitting}
-        className="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
-      >
+      <button type="submit" disabled={submitting} className={buttonPrimary}>
         {submitting ? "Saving..." : "Save"}
       </button>
     </form>

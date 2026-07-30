@@ -1,6 +1,7 @@
 import { query } from "@/lib/db";
 import { requireUserId } from "@/lib/current-user";
 import { formatCurrency, formatDate } from "@/lib/format";
+import { pageTitle, pageSubtitle, tableWrap, th, td, tdMuted, tr, emptyRow } from "@/lib/ui";
 import TransactionForm from "./TransactionForm";
 import DeleteTransactionButton from "./DeleteTransactionButton";
 
@@ -47,42 +48,42 @@ export default async function TransactionsPage() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold text-slate-900">Transactions</h1>
-        <p className="text-sm text-slate-500">Manual spend entries, tied to a category and pay period.</p>
+        <h1 className={pageTitle}>Transactions</h1>
+        <p className={pageSubtitle}>Manual spend entries, tied to a category and pay period.</p>
       </div>
 
       <TransactionForm categories={categoriesResult.rows} paychecks={paychecksResult.rows} />
 
-      <div className="rounded-xl border border-slate-200 bg-white">
-        <table className="w-full text-sm">
+      <div className={tableWrap}>
+        <table className="w-full">
           <thead>
-            <tr className="border-b border-slate-200 text-left text-slate-500">
-              <th className="px-4 py-2 font-medium">Date</th>
-              <th className="px-4 py-2 font-medium">Category</th>
-              <th className="px-4 py-2 font-medium">Merchant</th>
-              <th className="px-4 py-2 font-medium">Description</th>
-              <th className="px-4 py-2 font-medium">Amount</th>
-              <th className="px-4 py-2" />
+            <tr>
+              <th className={th}>Date</th>
+              <th className={th}>Category</th>
+              <th className={th}>Merchant</th>
+              <th className={th}>Description</th>
+              <th className={th}>Amount</th>
+              <th className={th} />
             </tr>
           </thead>
           <tbody>
             {transactionsResult.rows.map((t) => (
-              <tr key={t.id} className="border-b border-slate-100 last:border-0">
-                <td className="px-4 py-2 text-slate-500">{formatDate(t.txn_date)}</td>
-                <td className="px-4 py-2 text-slate-900">{t.category_name}</td>
-                <td className="px-4 py-2 text-slate-500">{t.merchant ?? "—"}</td>
-                <td className="px-4 py-2 text-slate-500">{t.description ?? "—"}</td>
-                <td className="px-4 py-2 text-slate-900">{formatCurrency(t.amount)}</td>
-                <td className="px-4 py-2 text-right">
+              <tr key={t.id} className={tr}>
+                <td className={tdMuted}>{formatDate(t.txn_date)}</td>
+                <td className={td}>{t.category_name}</td>
+                <td className={tdMuted}>{t.merchant ?? "—"}</td>
+                <td className={tdMuted}>{t.description ?? "—"}</td>
+                <td className={td}>{formatCurrency(t.amount)}</td>
+                <td className="px-4 py-3 text-right">
                   <DeleteTransactionButton id={t.id} />
                 </td>
               </tr>
             ))}
             {transactionsResult.rows.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-slate-400">
+                <td colSpan={6} className={emptyRow}>
                   No transactions yet.
                 </td>
               </tr>

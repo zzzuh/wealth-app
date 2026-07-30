@@ -2,6 +2,7 @@ import Link from "next/link";
 import { query } from "@/lib/db";
 import { requireUserId } from "@/lib/current-user";
 import { formatCurrency, formatDate } from "@/lib/format";
+import { pageTitle, link, sectionLabel, tableWrap, th, td, tdMuted, tr, emptyRow, amountTone } from "@/lib/ui";
 import CashNeededWidget from "./components/CashNeededWidget";
 import CheckingBalanceForm from "./components/CheckingBalanceForm";
 
@@ -58,18 +59,18 @@ export default async function DashboardPage() {
   defaultTargetDate.setDate(defaultTargetDate.getDate() + 30);
 
   return (
-    <div className="space-y-8">
-      <h1 className="text-2xl font-semibold text-slate-900">Dashboard</h1>
+    <div className="space-y-12">
+      <h1 className={pageTitle}>Dashboard</h1>
 
-      <section className="grid gap-6 md:grid-cols-2">
-        <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
-          <h2 className="text-sm font-semibold text-slate-700">Checking balance</h2>
+      <section className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-4 rounded-xl bg-slate-50 p-5">
+          <h2 className={sectionLabel}>Checking balance</h2>
           {checkingBalance ? (
             <div>
-              <p className="text-2xl font-semibold text-slate-900">
+              <p className="text-3xl font-semibold tracking-tight text-slate-900 tabular-nums">
                 {formatCurrency(checkingBalance.balance)}
               </p>
-              <p className="text-xs text-slate-400">as of {formatDate(checkingBalance.as_of)}</p>
+              <p className="mt-1 text-xs text-slate-400">as of {formatDate(checkingBalance.as_of)}</p>
             </div>
           ) : (
             <p className="text-sm text-slate-400">No balance entered yet.</p>
@@ -83,36 +84,36 @@ export default async function DashboardPage() {
         />
       </section>
 
-      <section className="space-y-3">
+      <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-slate-700">
-            Current paycheck {latestPaycheck && `(${formatDate(latestPaycheck.pay_date)})`}
+          <h2 className={sectionLabel}>
+            Current paycheck {latestPaycheck && `— ${formatDate(latestPaycheck.pay_date)}`}
           </h2>
-          <Link href="/paychecks" className="text-sm text-slate-500 hover:text-slate-900 underline">
+          <Link href="/paychecks" className={link}>
             View all
           </Link>
         </div>
 
         {latestPaycheck ? (
-          <div className="rounded-xl border border-slate-200 bg-white">
-            <table className="w-full text-sm">
+          <div className={tableWrap}>
+            <table className="w-full">
               <thead>
-                <tr className="border-b border-slate-200 text-left text-slate-500">
-                  <th className="px-4 py-2 font-medium">Category</th>
-                  <th className="px-4 py-2 font-medium">Allocated</th>
-                  <th className="px-4 py-2 font-medium">Spent</th>
-                  <th className="px-4 py-2 font-medium">Safe to spend</th>
+                <tr>
+                  <th className={th}>Category</th>
+                  <th className={th}>Allocated</th>
+                  <th className={th}>Spent</th>
+                  <th className={th}>Safe to spend</th>
                 </tr>
               </thead>
               <tbody>
                 {allocations.map((a) => {
                   const safeToSpend = Number(a.allocated_amount) - Number(a.spent);
                   return (
-                    <tr key={a.category_name} className="border-b border-slate-100 last:border-0">
-                      <td className="px-4 py-2 text-slate-900">{a.category_name}</td>
-                      <td className="px-4 py-2 text-slate-500">{formatCurrency(a.allocated_amount)}</td>
-                      <td className="px-4 py-2 text-slate-500">{formatCurrency(a.spent)}</td>
-                      <td className={`px-4 py-2 font-medium ${safeToSpend < 0 ? "text-red-600" : "text-emerald-600"}`}>
+                    <tr key={a.category_name} className={tr}>
+                      <td className={td}>{a.category_name}</td>
+                      <td className={tdMuted}>{formatCurrency(a.allocated_amount)}</td>
+                      <td className={tdMuted}>{formatCurrency(a.spent)}</td>
+                      <td className={`px-4 py-3 text-sm font-medium tabular-nums ${amountTone(safeToSpend)}`}>
                         {formatCurrency(safeToSpend)}
                       </td>
                     </tr>
@@ -122,9 +123,7 @@ export default async function DashboardPage() {
             </table>
           </div>
         ) : (
-          <p className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-400">
-            No paychecks recorded yet. Add one from the Paychecks page.
-          </p>
+          <p className={emptyRow}>No paychecks recorded yet. Add one from the Paychecks page.</p>
         )}
       </section>
     </div>

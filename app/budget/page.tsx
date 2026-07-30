@@ -1,6 +1,7 @@
 import { query } from "@/lib/db";
 import { requireUserId } from "@/lib/current-user";
 import { formatCurrency } from "@/lib/format";
+import { pageTitle, pageSubtitle, tableWrap, th, td, tdMuted, tr, emptyRow } from "@/lib/ui";
 import CategoryForm from "./CategoryForm";
 import ArchiveCategoryButton from "./ArchiveCategoryButton";
 
@@ -20,42 +21,42 @@ export default async function BudgetPage() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold text-slate-900">Budget categories</h1>
-        <p className="text-sm text-slate-500">
+        <h1 className={pageTitle}>Budget categories</h1>
+        <p className={pageSubtitle}>
           Define fixed dollar or percentage allocations. These are snapshotted onto each paycheck.
         </p>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white">
-        <table className="w-full text-sm">
+      <div className={tableWrap}>
+        <table className="w-full">
           <thead>
-            <tr className="border-b border-slate-200 text-left text-slate-500">
-              <th className="px-4 py-2 font-medium">Name</th>
-              <th className="px-4 py-2 font-medium">Type</th>
-              <th className="px-4 py-2 font-medium">Amount</th>
-              <th className="px-4 py-2" />
+            <tr>
+              <th className={th}>Name</th>
+              <th className={th}>Type</th>
+              <th className={th}>Amount</th>
+              <th className={th} />
             </tr>
           </thead>
           <tbody>
             {result.rows.map((c) => (
-              <tr key={c.id} className="border-b border-slate-100 last:border-0">
-                <td className="px-4 py-2 text-slate-900">{c.name}</td>
-                <td className="px-4 py-2 text-slate-500 capitalize">{c.allocation_type}</td>
-                <td className="px-4 py-2 text-slate-900">
+              <tr key={c.id} className={tr}>
+                <td className={td}>{c.name}</td>
+                <td className={`${tdMuted} capitalize`}>{c.allocation_type}</td>
+                <td className={td}>
                   {c.allocation_type === "fixed"
                     ? formatCurrency(c.fixed_amount ?? 0)
                     : `${c.percentage}%`}
                 </td>
-                <td className="px-4 py-2 text-right">
+                <td className="px-4 py-3 text-right">
                   <ArchiveCategoryButton id={c.id} />
                 </td>
               </tr>
             ))}
             {result.rows.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-6 text-center text-slate-400">
+                <td colSpan={4} className={emptyRow}>
                   No categories yet.
                 </td>
               </tr>

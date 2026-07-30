@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { input, buttonPrimary, errorText, label, formShell } from "@/lib/ui";
 
 interface Card {
   id: string;
@@ -52,21 +53,17 @@ export default function StatementForm({ cards }: { cards: Card[] }) {
 
   if (cards.length === 0) {
     return (
-      <p className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-500">
+      <p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-400">
         Add a card first before recording statements.
       </p>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-3 rounded-xl border border-slate-200 bg-white p-4">
-      <div className="flex flex-col gap-1">
-        <label className="text-xs font-medium text-slate-500">Card</label>
-        <select
-          value={cardId}
-          onChange={(e) => setCardId(e.target.value)}
-          className="rounded-md border border-slate-300 px-3 py-1.5 text-sm"
-        >
+    <form onSubmit={handleSubmit} className={formShell}>
+      <div className="flex flex-col gap-1.5">
+        <label className={label}>Card</label>
+        <select value={cardId} onChange={(e) => setCardId(e.target.value)} className={input}>
           {cards.map((c) => (
             <option key={c.id} value={c.id}>
               {c.nickname}
@@ -75,29 +72,23 @@ export default function StatementForm({ cards }: { cards: Card[] }) {
         </select>
       </div>
 
-      <div className="flex flex-col gap-1">
-        <label className="text-xs font-medium text-slate-500">Statement date</label>
+      <div className="flex flex-col gap-1.5">
+        <label className={label}>Statement date</label>
         <input
           type="date"
           value={statementDate}
           onChange={(e) => setStatementDate(e.target.value)}
-          className="rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+          className={input}
         />
       </div>
 
-      <div className="flex flex-col gap-1">
-        <label className="text-xs font-medium text-slate-500">Due date</label>
-        <input
-          required
-          type="date"
-          value={dueDate}
-          onChange={(e) => setDueDate(e.target.value)}
-          className="rounded-md border border-slate-300 px-3 py-1.5 text-sm"
-        />
+      <div className="flex flex-col gap-1.5">
+        <label className={label}>Due date</label>
+        <input required type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className={input} />
       </div>
 
-      <div className="flex flex-col gap-1">
-        <label className="text-xs font-medium text-slate-500">Statement balance</label>
+      <div className="flex flex-col gap-1.5">
+        <label className={label}>Statement balance</label>
         <input
           required
           type="number"
@@ -105,12 +96,12 @@ export default function StatementForm({ cards }: { cards: Card[] }) {
           min="0"
           value={statementBalance}
           onChange={(e) => setStatementBalance(e.target.value)}
-          className="w-28 rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+          className={`w-28 ${input}`}
         />
       </div>
 
-      <div className="flex flex-col gap-1">
-        <label className="text-xs font-medium text-slate-500">Minimum payment</label>
+      <div className="flex flex-col gap-1.5">
+        <label className={label}>Minimum payment</label>
         <input
           required
           type="number"
@@ -118,19 +109,15 @@ export default function StatementForm({ cards }: { cards: Card[] }) {
           min="0"
           value={minimumPayment}
           onChange={(e) => setMinimumPayment(e.target.value)}
-          className="w-28 rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+          className={`w-28 ${input}`}
         />
       </div>
 
-      <button
-        type="submit"
-        disabled={submitting}
-        className="rounded-md bg-slate-900 px-4 py-1.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
-      >
+      <button type="submit" disabled={submitting} className={buttonPrimary}>
         {submitting ? "Adding..." : "Add statement"}
       </button>
 
-      {error && <p className="w-full text-sm text-red-600">{error}</p>}
+      {error && <p className={`w-full ${errorText}`}>{error}</p>}
     </form>
   );
 }

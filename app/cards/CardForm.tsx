@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { input, buttonPrimary, errorText, label, formShell } from "@/lib/ui";
 
 export default function CardForm() {
   const router = useRouter();
@@ -45,57 +46,47 @@ export default function CardForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-3 rounded-xl border border-slate-200 bg-white p-4">
-      <div className="flex flex-col gap-1">
-        <label className="text-xs font-medium text-slate-500">Nickname</label>
+    <form onSubmit={handleSubmit} className={formShell}>
+      <div className="flex flex-col gap-1.5">
+        <label className={label}>Nickname</label>
         <input
           required
           value={nickname}
           onChange={(e) => setNickname(e.target.value)}
           placeholder="Chase Sapphire Reserve"
-          className="rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+          className={input}
         />
       </div>
 
-      <div className="flex flex-col gap-1">
-        <label className="text-xs font-medium text-slate-500">Issuer</label>
-        <input
-          value={issuer}
-          onChange={(e) => setIssuer(e.target.value)}
-          className="rounded-md border border-slate-300 px-3 py-1.5 text-sm"
-        />
+      <div className="flex flex-col gap-1.5">
+        <label className={label}>Issuer</label>
+        <input value={issuer} onChange={(e) => setIssuer(e.target.value)} className={input} />
       </div>
 
-      <div className="flex flex-col gap-1">
-        <label className="text-xs font-medium text-slate-500">Last 4</label>
+      <div className="flex flex-col gap-1.5">
+        <label className={label}>Last 4</label>
         <input
           value={lastFour}
           maxLength={4}
           onChange={(e) => setLastFour(e.target.value)}
-          className="w-16 rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+          className={`w-16 ${input}`}
         />
       </div>
 
-      <div className="flex items-center gap-2 pb-1.5">
+      <label className="flex items-center gap-2 pb-2 text-sm text-slate-600">
         <input
-          id="autopay"
           type="checkbox"
           checked={autopayEnabled}
           onChange={(e) => setAutopayEnabled(e.target.checked)}
+          className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-400"
         />
-        <label htmlFor="autopay" className="text-sm text-slate-600">
-          Autopay
-        </label>
-      </div>
+        Autopay
+      </label>
 
       {autopayEnabled && (
-        <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium text-slate-500">Autopay type</label>
-          <select
-            value={autopayType}
-            onChange={(e) => setAutopayType(e.target.value)}
-            className="rounded-md border border-slate-300 px-3 py-1.5 text-sm"
-          >
+        <div className="flex flex-col gap-1.5">
+          <label className={label}>Autopay type</label>
+          <select value={autopayType} onChange={(e) => setAutopayType(e.target.value)} className={input}>
             <option value="minimum">Minimum</option>
             <option value="statement_balance">Statement balance</option>
             <option value="full_balance">Full balance</option>
@@ -103,15 +94,11 @@ export default function CardForm() {
         </div>
       )}
 
-      <button
-        type="submit"
-        disabled={submitting}
-        className="rounded-md bg-slate-900 px-4 py-1.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
-      >
+      <button type="submit" disabled={submitting} className={buttonPrimary}>
         {submitting ? "Adding..." : "Add card"}
       </button>
 
-      {error && <p className="w-full text-sm text-red-600">{error}</p>}
+      {error && <p className={`w-full ${errorText}`}>{error}</p>}
     </form>
   );
 }

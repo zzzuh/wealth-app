@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { query } from "@/lib/db";
 import { requireUserId } from "@/lib/current-user";
 import { formatCurrency, formatDate } from "@/lib/format";
+import { link, pageTitle, tableWrap, th, td, tdMuted, tr, emptyRow, amountTone } from "@/lib/ui";
 
 interface Paycheck {
   id: string;
@@ -44,34 +45,34 @@ export default async function PaycheckDetailPage({ params }: { params: Promise<{
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
-        <Link href="/paychecks" className="text-sm text-slate-500 hover:text-slate-900">
+        <Link href="/paychecks" className={link}>
           &larr; Back to paychecks
         </Link>
-        <h1 className="mt-1 text-2xl font-semibold text-slate-900">{formatDate(paycheck.pay_date)}</h1>
-        <p className="text-sm text-slate-500">Net amount: {formatCurrency(paycheck.net_amount)}</p>
+        <h1 className={`mt-2 ${pageTitle}`}>{formatDate(paycheck.pay_date)}</h1>
+        <p className="mt-1 text-sm text-slate-400">Net amount: {formatCurrency(paycheck.net_amount)}</p>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white">
-        <table className="w-full text-sm">
+      <div className={tableWrap}>
+        <table className="w-full">
           <thead>
-            <tr className="border-b border-slate-200 text-left text-slate-500">
-              <th className="px-4 py-2 font-medium">Category</th>
-              <th className="px-4 py-2 font-medium">Allocated</th>
-              <th className="px-4 py-2 font-medium">Spent</th>
-              <th className="px-4 py-2 font-medium">Safe to spend</th>
+            <tr>
+              <th className={th}>Category</th>
+              <th className={th}>Allocated</th>
+              <th className={th}>Spent</th>
+              <th className={th}>Safe to spend</th>
             </tr>
           </thead>
           <tbody>
             {allocationsResult.rows.map((a) => {
               const safeToSpend = Number(a.allocated_amount) - Number(a.spent);
               return (
-                <tr key={a.id} className="border-b border-slate-100 last:border-0">
-                  <td className="px-4 py-2 text-slate-900">{a.category_name}</td>
-                  <td className="px-4 py-2 text-slate-500">{formatCurrency(a.allocated_amount)}</td>
-                  <td className="px-4 py-2 text-slate-500">{formatCurrency(a.spent)}</td>
-                  <td className={`px-4 py-2 font-medium ${safeToSpend < 0 ? "text-red-600" : "text-emerald-600"}`}>
+                <tr key={a.id} className={tr}>
+                  <td className={td}>{a.category_name}</td>
+                  <td className={tdMuted}>{formatCurrency(a.allocated_amount)}</td>
+                  <td className={tdMuted}>{formatCurrency(a.spent)}</td>
+                  <td className={`px-4 py-3 text-sm font-medium tabular-nums ${amountTone(safeToSpend)}`}>
                     {formatCurrency(safeToSpend)}
                   </td>
                 </tr>
@@ -79,7 +80,7 @@ export default async function PaycheckDetailPage({ params }: { params: Promise<{
             })}
             {allocationsResult.rows.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-6 text-center text-slate-400">
+                <td colSpan={4} className={emptyRow}>
                   No allocations for this paycheck.
                 </td>
               </tr>

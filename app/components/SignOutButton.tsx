@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { link } from "@/lib/ui";
 
 export default function SignOutButton() {
   const router = useRouter();
@@ -12,10 +13,7 @@ export default function SignOutButton() {
   }
 
   return (
-    <button
-      onClick={handleSignOut}
-      className="text-sm text-slate-500 hover:text-slate-900"
-    >
+    <button onClick={handleSignOut} className={link}>
       Sign out
     </button>
   );

@@ -1,6 +1,7 @@
 import { query } from "@/lib/db";
 import { requireUserId } from "@/lib/current-user";
 import { formatCurrency, formatDate } from "@/lib/format";
+import { pageTitle, pageSubtitle, sectionLabel, tableWrap, th, td, tdMuted, tr, emptyRow, pill } from "@/lib/ui";
 import CardForm from "./CardForm";
 import StatementForm from "./StatementForm";
 import MarkPaidButton from "./MarkPaidButton";
@@ -42,38 +43,36 @@ export default async function CardsPage() {
   );
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-12">
       <div>
-        <h1 className="text-2xl font-semibold text-slate-900">Credit cards</h1>
-        <p className="text-sm text-slate-500">Track statements and what you owe by when.</p>
+        <h1 className={pageTitle}>Credit cards</h1>
+        <p className={pageSubtitle}>Track statements and what you owe by when.</p>
       </div>
 
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-slate-700">Cards</h2>
-        <div className="rounded-xl border border-slate-200 bg-white">
-          <table className="w-full text-sm">
+      <section className="space-y-4">
+        <h2 className={sectionLabel}>Cards</h2>
+        <div className={tableWrap}>
+          <table className="w-full">
             <thead>
-              <tr className="border-b border-slate-200 text-left text-slate-500">
-                <th className="px-4 py-2 font-medium">Nickname</th>
-                <th className="px-4 py-2 font-medium">Issuer</th>
-                <th className="px-4 py-2 font-medium">Last 4</th>
-                <th className="px-4 py-2 font-medium">Autopay</th>
+              <tr>
+                <th className={th}>Nickname</th>
+                <th className={th}>Issuer</th>
+                <th className={th}>Last 4</th>
+                <th className={th}>Autopay</th>
               </tr>
             </thead>
             <tbody>
               {cardsResult.rows.map((c) => (
-                <tr key={c.id} className="border-b border-slate-100 last:border-0">
-                  <td className="px-4 py-2 text-slate-900">{c.nickname}</td>
-                  <td className="px-4 py-2 text-slate-500">{c.issuer ?? "—"}</td>
-                  <td className="px-4 py-2 text-slate-500">{c.last_four ?? "—"}</td>
-                  <td className="px-4 py-2 text-slate-500">
-                    {c.autopay_enabled ? c.autopay_type ?? "on" : "off"}
-                  </td>
+                <tr key={c.id} className={tr}>
+                  <td className={td}>{c.nickname}</td>
+                  <td className={tdMuted}>{c.issuer ?? "—"}</td>
+                  <td className={tdMuted}>{c.last_four ?? "—"}</td>
+                  <td className={tdMuted}>{c.autopay_enabled ? c.autopay_type ?? "on" : "off"}</td>
                 </tr>
               ))}
               {cardsResult.rows.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-4 py-6 text-center text-slate-400">
+                  <td colSpan={4} className={emptyRow}>
                     No cards yet.
                   </td>
                 </tr>
@@ -84,42 +83,38 @@ export default async function CardsPage() {
         <CardForm />
       </section>
 
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-slate-700">Statements</h2>
-        <div className="rounded-xl border border-slate-200 bg-white">
-          <table className="w-full text-sm">
+      <section className="space-y-4">
+        <h2 className={sectionLabel}>Statements</h2>
+        <div className={tableWrap}>
+          <table className="w-full">
             <thead>
-              <tr className="border-b border-slate-200 text-left text-slate-500">
-                <th className="px-4 py-2 font-medium">Card</th>
-                <th className="px-4 py-2 font-medium">Due date</th>
-                <th className="px-4 py-2 font-medium">Statement balance</th>
-                <th className="px-4 py-2 font-medium">Minimum</th>
-                <th className="px-4 py-2 font-medium">Status</th>
-                <th className="px-4 py-2" />
+              <tr>
+                <th className={th}>Card</th>
+                <th className={th}>Due date</th>
+                <th className={th}>Statement balance</th>
+                <th className={th}>Minimum</th>
+                <th className={th}>Status</th>
+                <th className={th} />
               </tr>
             </thead>
             <tbody>
               {statementsResult.rows.map((s) => (
-                <tr key={s.id} className="border-b border-slate-100 last:border-0">
-                  <td className="px-4 py-2 text-slate-900">{s.card_nickname}</td>
-                  <td className="px-4 py-2 text-slate-500">{formatDate(s.due_date)}</td>
-                  <td className="px-4 py-2 text-slate-900">{formatCurrency(s.statement_balance)}</td>
-                  <td className="px-4 py-2 text-slate-500">{formatCurrency(s.minimum_payment)}</td>
-                  <td className="px-4 py-2">
-                    {s.paid ? (
-                      <span className="text-emerald-600">Paid</span>
-                    ) : (
-                      <span className="text-amber-600">Unpaid</span>
-                    )}
+                <tr key={s.id} className={tr}>
+                  <td className={td}>{s.card_nickname}</td>
+                  <td className={tdMuted}>{formatDate(s.due_date)}</td>
+                  <td className={td}>{formatCurrency(s.statement_balance)}</td>
+                  <td className={tdMuted}>{formatCurrency(s.minimum_payment)}</td>
+                  <td className="px-4 py-3">
+                    <span className={pill(s.paid ? "emerald" : "amber")}>
+                      {s.paid ? "Paid" : "Unpaid"}
+                    </span>
                   </td>
-                  <td className="px-4 py-2 text-right">
-                    {!s.paid && <MarkPaidButton id={s.id} />}
-                  </td>
+                  <td className="px-4 py-3 text-right">{!s.paid && <MarkPaidButton id={s.id} />}</td>
                 </tr>
               ))}
               {statementsResult.rows.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-6 text-center text-slate-400">
+                  <td colSpan={6} className={emptyRow}>
                     No statements yet.
                   </td>
                 </tr>

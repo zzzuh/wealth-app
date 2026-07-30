@@ -2,6 +2,7 @@ import Link from "next/link";
 import { query } from "@/lib/db";
 import { requireUserId } from "@/lib/current-user";
 import { formatCurrency, formatDate } from "@/lib/format";
+import { pageTitle, pageSubtitle, sectionLabel, tableWrap, th, td, tdMuted, tr, emptyRow, link } from "@/lib/ui";
 import PaycheckForm from "./PaycheckForm";
 import PayScheduleForm from "./PayScheduleForm";
 
@@ -42,38 +43,38 @@ export default async function PaychecksPage() {
   );
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-12">
       <div>
-        <h1 className="text-2xl font-semibold text-slate-900">Paychecks</h1>
-        <p className="text-sm text-slate-500">
+        <h1 className={pageTitle}>Paychecks</h1>
+        <p className={pageSubtitle}>
           Each paycheck snapshots your budget categories into allocations at that moment.
         </p>
       </div>
 
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-slate-700">Pay schedule</h2>
-        <div className="rounded-xl border border-slate-200 bg-white">
-          <table className="w-full text-sm">
+      <section className="space-y-4">
+        <h2 className={sectionLabel}>Pay schedule</h2>
+        <div className={tableWrap}>
+          <table className="w-full">
             <thead>
-              <tr className="border-b border-slate-200 text-left text-slate-500">
-                <th className="px-4 py-2 font-medium">Frequency</th>
-                <th className="px-4 py-2 font-medium">Net amount</th>
-                <th className="px-4 py-2 font-medium">Next pay date</th>
-                <th className="px-4 py-2 font-medium">Active</th>
+              <tr>
+                <th className={th}>Frequency</th>
+                <th className={th}>Net amount</th>
+                <th className={th}>Next pay date</th>
+                <th className={th}>Active</th>
               </tr>
             </thead>
             <tbody>
               {schedulesResult.rows.map((s) => (
-                <tr key={s.id} className="border-b border-slate-100 last:border-0">
-                  <td className="px-4 py-2 capitalize text-slate-900">{s.frequency}</td>
-                  <td className="px-4 py-2 text-slate-900">{formatCurrency(s.net_amount)}</td>
-                  <td className="px-4 py-2 text-slate-500">{formatDate(s.next_pay_date)}</td>
-                  <td className="px-4 py-2 text-slate-500">{s.active ? "Yes" : "No"}</td>
+                <tr key={s.id} className={tr}>
+                  <td className={`${td} capitalize`}>{s.frequency}</td>
+                  <td className={td}>{formatCurrency(s.net_amount)}</td>
+                  <td className={tdMuted}>{formatDate(s.next_pay_date)}</td>
+                  <td className={tdMuted}>{s.active ? "Yes" : "No"}</td>
                 </tr>
               ))}
               {schedulesResult.rows.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-4 py-6 text-center text-slate-400">
+                  <td colSpan={4} className={emptyRow}>
                     No pay schedule set yet.
                   </td>
                 </tr>
@@ -84,28 +85,28 @@ export default async function PaychecksPage() {
         <PayScheduleForm />
       </section>
 
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-slate-700">Paycheck history</h2>
-        <div className="rounded-xl border border-slate-200 bg-white">
-          <table className="w-full text-sm">
+      <section className="space-y-4">
+        <h2 className={sectionLabel}>Paycheck history</h2>
+        <div className={tableWrap}>
+          <table className="w-full">
             <thead>
-              <tr className="border-b border-slate-200 text-left text-slate-500">
-                <th className="px-4 py-2 font-medium">Pay date</th>
-                <th className="px-4 py-2 font-medium">Net amount</th>
-                <th className="px-4 py-2 font-medium">Allocated</th>
-                <th className="px-4 py-2 font-medium">Spent</th>
-                <th className="px-4 py-2" />
+              <tr>
+                <th className={th}>Pay date</th>
+                <th className={th}>Net amount</th>
+                <th className={th}>Allocated</th>
+                <th className={th}>Spent</th>
+                <th className={th} />
               </tr>
             </thead>
             <tbody>
               {paychecksResult.rows.map((p) => (
-                <tr key={p.id} className="border-b border-slate-100 last:border-0">
-                  <td className="px-4 py-2 text-slate-900">{formatDate(p.pay_date)}</td>
-                  <td className="px-4 py-2 text-slate-900">{formatCurrency(p.net_amount)}</td>
-                  <td className="px-4 py-2 text-slate-500">{formatCurrency(p.total_allocated)}</td>
-                  <td className="px-4 py-2 text-slate-500">{formatCurrency(p.total_spent)}</td>
-                  <td className="px-4 py-2 text-right">
-                    <Link href={`/paychecks/${p.id}`} className="text-sm text-slate-600 hover:text-slate-900 underline">
+                <tr key={p.id} className={tr}>
+                  <td className={td}>{formatDate(p.pay_date)}</td>
+                  <td className={td}>{formatCurrency(p.net_amount)}</td>
+                  <td className={tdMuted}>{formatCurrency(p.total_allocated)}</td>
+                  <td className={tdMuted}>{formatCurrency(p.total_spent)}</td>
+                  <td className="px-4 py-3 text-right">
+                    <Link href={`/paychecks/${p.id}`} className={link}>
                       View
                     </Link>
                   </td>
@@ -113,7 +114,7 @@ export default async function PaychecksPage() {
               ))}
               {paychecksResult.rows.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-6 text-center text-slate-400">
+                  <td colSpan={5} className={emptyRow}>
                     No paychecks recorded yet.
                   </td>
                 </tr>

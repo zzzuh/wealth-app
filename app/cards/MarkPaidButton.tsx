@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { buttonGhostSuccess } from "@/lib/ui";
 
 export default function MarkPaidButton({ id }: { id: string }) {
   const router = useRouter();
@@ -15,7 +16,7 @@ export default function MarkPaidButton({ id }: { id: string }) {
   }
 
   return (
-    <button onClick={handleClick} className="text-xs text-slate-500 hover:text-emerald-600">
+    <button onClick={handleClick} className={buttonGhostSuccess}>
       Mark paid
     </button>
   );

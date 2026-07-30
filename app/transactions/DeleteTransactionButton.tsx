@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { buttonGhostDanger } from "@/lib/ui";
 
 export default function DeleteTransactionButton({ id }: { id: string }) {
   const router = useRouter();
@@ -11,7 +12,7 @@ export default function DeleteTransactionButton({ id }: { id: string }) {
   }
 
   return (
-    <button onClick={handleClick} className="text-xs text-slate-400 hover:text-red-600">
+    <button onClick={handleClick} className={buttonGhostDanger}>
       Delete
     </button>
   );

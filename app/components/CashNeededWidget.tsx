@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { formatCurrency } from "@/lib/format";
+import { sectionLabel, amountTone } from "@/lib/ui";
 
 interface CashNeededResponse {
   target_date: string;
@@ -35,14 +36,14 @@ export default function CashNeededWidget({
   }, [date]);
 
   return (
-    <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
+    <div className="space-y-4 rounded-xl bg-slate-50 p-5">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-slate-700">Cash needed by</h2>
+        <h2 className={sectionLabel}>Cash needed by</h2>
         <input
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
-          className="rounded-md border border-slate-300 px-2 py-1 text-xs"
+          className="rounded-lg border border-transparent bg-slate-100 px-2 py-1 text-xs text-slate-600 focus:border-slate-300 focus:bg-white focus:outline-none"
         />
       </div>
 
@@ -50,18 +51,20 @@ export default function CashNeededWidget({
 
       {!loading && data && (
         <div className="space-y-2">
-          <p className="text-2xl font-semibold text-slate-900">{formatCurrency(data.cash_needed)}</p>
+          <p className="text-3xl font-semibold tracking-tight text-slate-900 tabular-nums">
+            {formatCurrency(data.cash_needed)}
+          </p>
           {surplus != null && (
-            <p className={`text-sm ${surplus < 0 ? "text-red-600" : "text-emerald-600"}`}>
+            <p className={`text-sm font-medium ${amountTone(surplus)}`}>
               {surplus < 0
                 ? `Short ${formatCurrency(Math.abs(surplus))} vs. checking`
                 : `${formatCurrency(surplus)} surplus vs. checking`}
             </p>
           )}
           {data.breakdown.length > 0 && (
-            <ul className="space-y-1 text-xs text-slate-500">
+            <ul className="space-y-1.5 pt-1 text-xs text-slate-400">
               {data.breakdown.map((b) => (
-                <li key={b.statement_id} className="flex justify-between">
+                <li key={b.statement_id} className="flex justify-between tabular-nums">
                   <span>{b.card_nickname}</span>
                   <span>{formatCurrency(b.amount_due)}</span>
                 </li>
