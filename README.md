@@ -60,7 +60,8 @@ Visit [http://localhost:3000](http://localhost:3000) and sign in with the admin 
 
 - **Safe to spend** per category = `allocated_amount - SUM(transactions.amount)` for that paycheck/category pair. Computed live at query time, never stored, so it can't drift.
 - **Recording a paycheck** snapshots your current active `budget_categories` into `budget_allocations` for that paycheck — later edits to a category's amount/percentage don't retroactively change past paychecks.
-- **Cash needed by date** sums, across all unpaid card statements due on or before the chosen date, either the `minimum_payment` (if the card has autopay set to "minimum") or the full `statement_balance` (otherwise). That total is compared against your latest checking balance entry to show a surplus or shortfall.
+- **Cash needed by date** sums, across all unpaid card statements due on or before the chosen date, either the `minimum_payment` (if the card has autopay set to "minimum") or the full `statement_balance` (otherwise). That total is compared against the sum of your checking-type accounts to show a surplus or shortfall.
+- **Checking / savings totals** are the sum of your `accounts` rows by `type`. Each account is a single editable/deletable row (not a balance history log) — editing it updates the balance in place.
 
 ## Deploying
 
