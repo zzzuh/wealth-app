@@ -105,3 +105,18 @@ CREATE TABLE IF NOT EXISTS checking_balance (
   as_of TIMESTAMPTZ DEFAULT now(),
   source TEXT DEFAULT 'manual' CHECK (source IN ('manual','plaid'))
 );
+
+-- This app only ever talks to Postgres directly (via `pg`, as the bypassrls
+-- `postgres` role) and never through Supabase's auto-generated PostgREST/anon
+-- API, so RLS is enabled with zero policies: a hard default-deny for the
+-- anon/authenticated roles that API would otherwise use, with no effect on
+-- our own connection.
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE pay_schedules ENABLE ROW LEVEL SECURITY;
+ALTER TABLE paychecks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE budget_categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE budget_allocations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE credit_cards ENABLE ROW LEVEL SECURITY;
+ALTER TABLE card_statements ENABLE ROW LEVEL SECURITY;
+ALTER TABLE checking_balance ENABLE ROW LEVEL SECURITY;
