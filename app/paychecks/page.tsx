@@ -5,6 +5,8 @@ import { formatCurrency, formatDate } from "@/lib/format";
 import { pageTitle, pageSubtitle, sectionLabel, tableWrap, th, td, tdMuted, tr, emptyRow, link } from "@/lib/ui";
 import PaycheckForm from "./PaycheckForm";
 import PayScheduleForm from "./PayScheduleForm";
+import EditPaycheckButton from "./EditPaycheckButton";
+import DeletePaycheckButton from "./DeletePaycheckButton";
 
 interface PaySchedule {
   id: string;
@@ -105,10 +107,14 @@ export default async function PaychecksPage() {
                   <td className={td}>{formatCurrency(p.net_amount)}</td>
                   <td className={tdMuted}>{formatCurrency(p.total_allocated)}</td>
                   <td className={tdMuted}>{formatCurrency(p.total_spent)}</td>
-                  <td className="px-4 py-3 text-right">
-                    <Link href={`/paychecks/${p.id}`} className={link}>
-                      View
-                    </Link>
+                  <td className="px-4 py-3">
+                    <div className="flex justify-end gap-4">
+                      <Link href={`/paychecks/${p.id}`} className={link}>
+                        View
+                      </Link>
+                      <EditPaycheckButton paycheck={p} />
+                      <DeletePaycheckButton id={p.id} payDate={p.pay_date} />
+                    </div>
                   </td>
                 </tr>
               ))}

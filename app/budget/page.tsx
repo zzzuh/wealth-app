@@ -3,7 +3,8 @@ import { requireUserId } from "@/lib/current-user";
 import { formatCurrency } from "@/lib/format";
 import { pageTitle, pageSubtitle, tableWrap, th, td, tdMuted, tr, emptyRow } from "@/lib/ui";
 import CategoryForm from "./CategoryForm";
-import ArchiveCategoryButton from "./ArchiveCategoryButton";
+import EditCategoryButton from "./EditCategoryButton";
+import DeleteCategoryButton from "./DeleteCategoryButton";
 
 interface Category {
   id: string;
@@ -49,8 +50,11 @@ export default async function BudgetPage() {
                     ? formatCurrency(c.fixed_amount ?? 0)
                     : `${c.percentage}%`}
                 </td>
-                <td className="px-4 py-3 text-right">
-                  <ArchiveCategoryButton id={c.id} />
+                <td className="px-4 py-3">
+                  <div className="flex justify-end gap-4">
+                    <EditCategoryButton category={c} />
+                    <DeleteCategoryButton id={c.id} name={c.name} />
+                  </div>
                 </td>
               </tr>
             ))}

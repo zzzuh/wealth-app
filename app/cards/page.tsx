@@ -5,6 +5,8 @@ import { pageTitle, pageSubtitle, sectionLabel, tableWrap, th, td, tdMuted, tr, 
 import CardForm from "./CardForm";
 import StatementForm from "./StatementForm";
 import MarkPaidButton from "./MarkPaidButton";
+import EditCardButton from "./EditCardButton";
+import DeleteCardButton from "./DeleteCardButton";
 
 interface Card {
   id: string;
@@ -37,7 +39,7 @@ export default async function CardsPage() {
     `SELECT s.*, c.nickname AS card_nickname
      FROM card_statements s
      JOIN credit_cards c ON c.id = s.card_id
-     WHERE c.user_id = $1
+     WHERE c.user_id = $1 AND c.archived = false
      ORDER BY s.paid, s.due_date`,
     [userId]
   );
@@ -59,6 +61,7 @@ export default async function CardsPage() {
                 <th className={th}>Issuer</th>
                 <th className={th}>Last 4</th>
                 <th className={th}>Autopay</th>
+                <th className={th} />
               </tr>
             </thead>
             <tbody>
@@ -68,11 +71,17 @@ export default async function CardsPage() {
                   <td className={tdMuted}>{c.issuer ?? "—"}</td>
                   <td className={tdMuted}>{c.last_four ?? "—"}</td>
                   <td className={tdMuted}>{c.autopay_enabled ? c.autopay_type ?? "on" : "off"}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex justify-end gap-4">
+                      <EditCardButton card={c} />
+                      <DeleteCardButton id={c.id} nickname={c.nickname} />
+                    </div>
+                  </td>
                 </tr>
               ))}
               {cardsResult.rows.length === 0 && (
                 <tr>
-                  <td colSpan={4} className={emptyRow}>
+                  <td colSpan={5} className={emptyRow}>
                     No cards yet.
                   </td>
                 </tr>

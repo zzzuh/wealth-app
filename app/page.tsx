@@ -2,9 +2,24 @@ import Link from "next/link";
 import { query } from "@/lib/db";
 import { requireUserId } from "@/lib/current-user";
 import { formatCurrency, formatDate } from "@/lib/format";
-import { pageTitle, link, sectionLabel, tableWrap, th, td, tdMuted, tr, emptyRow, amountTone } from "@/lib/ui";
+import {
+  pageTitle,
+  link,
+  sectionLabel,
+  statCard,
+  statValue,
+  tableWrap,
+  th,
+  td,
+  tdMuted,
+  tr,
+  emptyRow,
+  amountTone,
+} from "@/lib/ui";
 import CashNeededWidget from "./components/CashNeededWidget";
-import CheckingBalanceForm from "./components/CheckingBalanceForm";
+import AccountForm from "./components/AccountForm";
+import EditAccountButton from "./components/EditAccountButton";
+import DeleteAccountButton from "./components/DeleteAccountButton";
 
 interface Paycheck {
   id: string;
@@ -18,7 +33,10 @@ interface Allocation {
   spent: string;
 }
 
-interface CheckingBalance {
+interface Account {
+  id: string;
+  name: string;
+  type: "checking" | "savings";
   balance: string;
   as_of: string;
 }
@@ -49,11 +67,17 @@ export default async function DashboardPage() {
     allocations = allocationsResult.rows;
   }
 
-  const balanceResult = await query<CheckingBalance>(
-    `SELECT balance, as_of FROM checking_balance WHERE user_id = $1 ORDER BY as_of DESC LIMIT 1`,
+  const accountsResult = await query<Account>(
+    `SELECT * FROM accounts WHERE user_id = $1 ORDER BY type, created_at`,
     [userId]
   );
-  const checkingBalance = balanceResult.rows[0] ?? null;
+  const accounts = accountsResult.rows;
+  const totalChecking = accounts
+    .filter((a) => a.type === "checking")
+    .reduce((sum, a) => sum + Number(a.balance), 0);
+  const totalSavings = accounts
+    .filter((a) => a.type === "savings")
+    .reduce((sum, a) => sum + Number(a.balance), 0);
 
   const defaultTargetDate = new Date();
   defaultTargetDate.setDate(defaultTargetDate.getDate() + 30);
@@ -62,26 +86,62 @@ export default async function DashboardPage() {
     <div className="space-y-12">
       <h1 className={pageTitle}>Dashboard</h1>
 
-      <section className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-4 rounded-xl bg-slate-50 p-5">
-          <h2 className={sectionLabel}>Checking balance</h2>
-          {checkingBalance ? (
-            <div>
-              <p className="text-3xl font-semibold tracking-tight text-slate-900 tabular-nums">
-                {formatCurrency(checkingBalance.balance)}
-              </p>
-              <p className="mt-1 text-xs text-slate-400">as of {formatDate(checkingBalance.as_of)}</p>
-            </div>
-          ) : (
-            <p className="text-sm text-slate-400">No balance entered yet.</p>
-          )}
-          <CheckingBalanceForm />
+      <section className="grid gap-4 sm:grid-cols-3">
+        <div className={statCard}>
+          <h2 className={sectionLabel}>Checking</h2>
+          <p className={statValue}>{formatCurrency(totalChecking)}</p>
+        </div>
+
+        <div className={statCard}>
+          <h2 className={sectionLabel}>Savings</h2>
+          <p className={statValue}>{formatCurrency(totalSavings)}</p>
         </div>
 
         <CashNeededWidget
           defaultDate={defaultTargetDate.toISOString().slice(0, 10)}
-          checkingBalance={checkingBalance ? Number(checkingBalance.balance) : null}
+          checkingBalance={totalChecking}
         />
+      </section>
+
+      <section className="space-y-4">
+        <h2 className={sectionLabel}>Accounts</h2>
+        <div className={tableWrap}>
+          <table className="w-full">
+            <thead>
+              <tr>
+                <th className={th}>Name</th>
+                <th className={th}>Type</th>
+                <th className={th}>Balance</th>
+                <th className={th}>As of</th>
+                <th className={th} />
+              </tr>
+            </thead>
+            <tbody>
+              {accounts.map((a) => (
+                <tr key={a.id} className={tr}>
+                  <td className={td}>{a.name}</td>
+                  <td className={`${tdMuted} capitalize`}>{a.type}</td>
+                  <td className={td}>{formatCurrency(a.balance)}</td>
+                  <td className={tdMuted}>{formatDate(a.as_of)}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex justify-end gap-4">
+                      <EditAccountButton account={a} />
+                      <DeleteAccountButton id={a.id} name={a.name} />
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {accounts.length === 0 && (
+                <tr>
+                  <td colSpan={5} className={emptyRow}>
+                    No accounts yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+        <AccountForm />
       </section>
 
       <section className="space-y-4">

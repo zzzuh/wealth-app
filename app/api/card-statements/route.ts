@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     `SELECT s.*, c.nickname AS card_nickname
      FROM card_statements s
      JOIN credit_cards c ON c.id = s.card_id
-     WHERE c.user_id = $1 ${cardId ? "AND s.card_id = $2" : ""}
+     WHERE c.user_id = $1 AND c.archived = false ${cardId ? "AND s.card_id = $2" : ""}
      ORDER BY s.due_date DESC`,
     cardId ? [userId, cardId] : [userId]
   );

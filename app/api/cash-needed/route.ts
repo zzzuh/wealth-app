@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
             c.nickname AS card_nickname, c.autopay_enabled, c.autopay_type
      FROM card_statements s
      JOIN credit_cards c ON c.id = s.card_id
-     WHERE c.user_id = $1 AND s.paid = false AND s.due_date <= $2
+     WHERE c.user_id = $1 AND c.archived = false AND s.paid = false AND s.due_date <= $2
      ORDER BY s.due_date`,
     [userId, targetDate]
   );
@@ -45,11 +45,11 @@ export async function GET(request: NextRequest) {
 
   const cashNeeded = breakdown.reduce((sum, item) => sum + item.amount_due, 0);
 
-  const balanceResult = await query<{ balance: string; as_of: string }>(
-    `SELECT balance, as_of FROM checking_balance WHERE user_id = $1 ORDER BY as_of DESC LIMIT 1`,
+  const balanceResult = await query<{ total: string }>(
+    `SELECT COALESCE(SUM(balance), 0) AS total FROM accounts WHERE user_id = $1 AND type = 'checking'`,
     [userId]
   );
-  const currentBalance = balanceResult.rows[0] ? Number(balanceResult.rows[0].balance) : null;
+  const currentBalance = Number(balanceResult.rows[0].total);
 
   return NextResponse.json({
     target_date: targetDate,

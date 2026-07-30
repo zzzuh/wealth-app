@@ -6,6 +6,11 @@ export const label = "text-xs font-medium text-slate-400";
 export const buttonPrimary =
   "rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40";
 
+export const buttonDanger =
+  "rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-40";
+
+export const buttonSecondary = "text-sm text-slate-400 transition-colors hover:text-slate-900";
+
 export const buttonGhost = "text-xs text-slate-400 transition-colors hover:text-slate-900";
 export const buttonGhostDanger = "text-xs text-slate-400 transition-colors hover:text-red-600";
 export const buttonGhostSuccess = "text-xs text-slate-400 transition-colors hover:text-emerald-600";
@@ -43,3 +48,7 @@ export function pill(tone: "emerald" | "amber" | "red") {
 export function amountTone(value: number) {
   return value < 0 ? "text-red-600" : "text-emerald-600";
 }
+
+export const modalPanel =
+  "w-full max-w-sm rounded-xl border border-slate-100 bg-white p-6 shadow-xl backdrop:bg-slate-900/20";
+export const modalTitle = "text-sm font-semibold text-slate-900";

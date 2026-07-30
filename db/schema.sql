@@ -70,6 +70,12 @@ CREATE TABLE IF NOT EXISTS transactions (
 CREATE INDEX IF NOT EXISTS idx_transactions_paycheck ON transactions(paycheck_id);
 CREATE INDEX IF NOT EXISTS idx_transactions_category ON transactions(category_id);
 
+-- Deleting a paycheck shouldn't be blocked by (or destroy) transactions that
+-- already happened against it — just detach them.
+ALTER TABLE transactions DROP CONSTRAINT IF EXISTS transactions_paycheck_id_fkey;
+ALTER TABLE transactions ADD CONSTRAINT transactions_paycheck_id_fkey
+  FOREIGN KEY (paycheck_id) REFERENCES paychecks(id) ON DELETE SET NULL;
+
 CREATE TABLE IF NOT EXISTS credit_cards (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES users(id) ON DELETE CASCADE,
@@ -98,13 +104,35 @@ CREATE TABLE IF NOT EXISTS card_statements (
 CREATE INDEX IF NOT EXISTS idx_card_statements_due_date ON card_statements(due_date) WHERE paid = false;
 
 -- Manual-entry only in this build (no linked_accounts table yet — Plaid phase is out of scope).
-CREATE TABLE IF NOT EXISTS checking_balance (
+-- Each row is a single editable account (checking or savings), not an
+-- append-only balance log — editing an account updates its balance in place.
+CREATE TABLE IF NOT EXISTS accounts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-  balance NUMERIC(12,2) NOT NULL,
+  name TEXT NOT NULL,
+  type TEXT NOT NULL CHECK (type IN ('checking','savings')),
+  balance NUMERIC(12,2) NOT NULL DEFAULT 0,
   as_of TIMESTAMPTZ DEFAULT now(),
-  source TEXT DEFAULT 'manual' CHECK (source IN ('manual','plaid'))
+  source TEXT DEFAULT 'manual' CHECK (source IN ('manual','plaid')),
+  created_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- One-time migration from the old single-balance checking_balance table (if
+-- it's still around) into a "Checking" account, then drop it.
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'checking_balance')
+     AND NOT EXISTS (SELECT 1 FROM accounts)
+  THEN
+    INSERT INTO accounts (user_id, name, type, balance, as_of)
+    SELECT user_id, 'Checking', 'checking', balance, as_of
+    FROM checking_balance
+    ORDER BY as_of DESC
+    LIMIT 1;
+  END IF;
+END $$;
+
+DROP TABLE IF EXISTS checking_balance;
 
 -- This app only ever talks to Postgres directly (via `pg`, as the bypassrls
 -- `postgres` role) and never through Supabase's auto-generated PostgREST/anon
@@ -119,4 +147,4 @@ ALTER TABLE budget_allocations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE credit_cards ENABLE ROW LEVEL SECURITY;
 ALTER TABLE card_statements ENABLE ROW LEVEL SECURITY;
-ALTER TABLE checking_balance ENABLE ROW LEVEL SECURITY;
+ALTER TABLE accounts ENABLE ROW LEVEL SECURITY;
