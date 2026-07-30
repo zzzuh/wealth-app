@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Modal from "../components/Modal";
 import { input, buttonPrimary, errorText, label, buttonSecondary } from "@/lib/ui";
+import { FREQUENCY_OPTIONS, frequencyLabel, prorateForPaycheck } from "@/lib/frequency";
+import { formatCurrency } from "@/lib/format";
 
 interface Category {
   id: string;
@@ -11,9 +13,16 @@ interface Category {
   allocation_type: "fixed" | "percentage";
   fixed_amount: string | null;
   percentage: string | null;
+  frequency: string | null;
 }
 
-export default function EditCategoryButton({ category }: { category: Category }) {
+export default function EditCategoryButton({
+  category,
+  payScheduleFrequency,
+}: {
+  category: Category;
+  payScheduleFrequency: string | null;
+}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(category.name);
@@ -21,6 +30,7 @@ export default function EditCategoryButton({ category }: { category: Category })
   const [amount, setAmount] = useState(
     category.allocation_type === "fixed" ? category.fixed_amount ?? "" : category.percentage ?? ""
   );
+  const [frequency, setFrequency] = useState(category.frequency ?? "");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,7 +39,7 @@ export default function EditCategoryButton({ category }: { category: Category })
     setSubmitting(true);
     setError(null);
 
-    const body: Record<string, unknown> = { name, allocation_type: allocationType };
+    const body: Record<string, unknown> = { name, allocation_type: allocationType, frequency: frequency || null };
     if (allocationType === "fixed") body.fixed_amount = amount;
     else body.percentage = amount;
 
@@ -50,6 +60,11 @@ export default function EditCategoryButton({ category }: { category: Category })
     setOpen(false);
     router.refresh();
   }
+
+  const previewAmount =
+    allocationType === "fixed" && frequency && payScheduleFrequency && amount
+      ? prorateForPaycheck(Number(amount), frequency, payScheduleFrequency)
+      : null;
 
   return (
     <>
@@ -87,6 +102,26 @@ export default function EditCategoryButton({ category }: { category: Category })
               className={`w-full ${input}`}
             />
           </div>
+
+          {allocationType === "fixed" && (
+            <div className="flex flex-col gap-1.5">
+              <label className={label}>Frequency</label>
+              <select value={frequency} onChange={(e) => setFrequency(e.target.value)} className={`w-full ${input}`}>
+                <option value="">Every paycheck</option>
+                {FREQUENCY_OPTIONS.map((f) => (
+                  <option key={f.value} value={f.value}>
+                    {f.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {previewAmount != null && (
+            <p className="text-xs text-slate-400">
+              ≈ {formatCurrency(previewAmount)} per {frequencyLabel(payScheduleFrequency).toLowerCase()} paycheck
+            </p>
+          )}
 
           {error && <p className={errorText}>{error}</p>}
 

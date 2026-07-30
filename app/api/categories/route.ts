@@ -14,7 +14,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const userId = await requireUserId();
   const body = await request.json();
-  const { name, allocation_type, fixed_amount, percentage, sort_order } = body;
+  const { name, allocation_type, fixed_amount, percentage, frequency, sort_order } = body;
 
   if (!name || !allocation_type) {
     return NextResponse.json({ error: "name and allocation_type are required" }, { status: 400 });
@@ -25,12 +25,20 @@ export async function POST(request: NextRequest) {
   if (allocation_type === "percentage" && percentage == null) {
     return NextResponse.json({ error: "percentage is required for percentage categories" }, { status: 400 });
   }
+  const allowedFrequencies = ["weekly", "biweekly", "semimonthly", "monthly"];
+  if (frequency != null && !allowedFrequencies.includes(frequency)) {
+    return NextResponse.json({ error: "frequency must be one of " + allowedFrequencies.join(", ") }, { status: 400 });
+  }
+
+  // Frequency only applies to fixed-amount expenses — a percentage of a
+  // paycheck already scales to that specific paycheck.
+  const finalFrequency = allocation_type === "percentage" ? null : frequency ?? null;
 
   const result = await query(
-    `INSERT INTO budget_categories (user_id, name, allocation_type, fixed_amount, percentage, sort_order)
-     VALUES ($1, $2, $3, $4, $5, $6)
+    `INSERT INTO budget_categories (user_id, name, allocation_type, fixed_amount, percentage, frequency, sort_order)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)
      RETURNING *`,
-    [userId, name, allocation_type, fixed_amount ?? null, percentage ?? null, sort_order ?? 0]
+    [userId, name, allocation_type, fixed_amount ?? null, percentage ?? null, finalFrequency, sort_order ?? 0]
   );
   return NextResponse.json(result.rows[0], { status: 201 });
 }

@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query, pool } from "@/lib/db";
 import { requireUserId } from "@/lib/current-user";
+import { prorateForPaycheck } from "@/lib/frequency";
 
 interface CategoryRow {
   id: string;
   allocation_type: "fixed" | "percentage";
   fixed_amount: string | null;
   percentage: string | null;
+  frequency: string | null;
 }
 
 export async function GET() {
@@ -48,17 +50,26 @@ export async function POST(request: NextRequest) {
     const paycheck = paycheckResult.rows[0];
 
     const categoriesResult = await client.query<CategoryRow>(
-      `SELECT id, allocation_type, fixed_amount, percentage
+      `SELECT id, allocation_type, fixed_amount, percentage, frequency
        FROM budget_categories
        WHERE user_id = $1 AND archived = false`,
       [userId]
     );
 
+    let payScheduleFrequency: string | null = null;
+    if (pay_schedule_id) {
+      const scheduleResult = await client.query<{ frequency: string }>(
+        `SELECT frequency FROM pay_schedules WHERE id = $1 AND user_id = $2`,
+        [pay_schedule_id, userId]
+      );
+      payScheduleFrequency = scheduleResult.rows[0]?.frequency ?? null;
+    }
+
     const allocations = [];
     for (const category of categoriesResult.rows) {
       const allocatedAmount =
         category.allocation_type === "fixed"
-          ? Number(category.fixed_amount)
+          ? prorateForPaycheck(Number(category.fixed_amount), category.frequency, payScheduleFrequency)
           : (Number(net_amount) * Number(category.percentage)) / 100;
 
       const allocationResult = await client.query(

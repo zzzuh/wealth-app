@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS budget_categories (
   allocation_type TEXT NOT NULL CHECK (allocation_type IN ('fixed','percentage')),
   fixed_amount NUMERIC(12,2),
   percentage NUMERIC(5,2),
+  frequency TEXT,
   sort_order INT DEFAULT 0,
   archived BOOLEAN DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT now(),
@@ -50,6 +51,21 @@ CREATE TABLE IF NOT EXISTS budget_categories (
     (allocation_type = 'percentage' AND percentage IS NOT NULL)
   )
 );
+
+-- `frequency` lets a fixed-amount expense recur less often than every
+-- paycheck (e.g. rent monthly, groceries weekly). NULL means "every
+-- paycheck", which matches the original behavior and is the default for
+-- expenses that don't need proration. Not meaningful for percentage-of-
+-- paycheck categories, which already scale to that specific paycheck.
+ALTER TABLE budget_categories ADD COLUMN IF NOT EXISTS frequency TEXT;
+
+ALTER TABLE budget_categories DROP CONSTRAINT IF EXISTS budget_categories_frequency_check;
+ALTER TABLE budget_categories ADD CONSTRAINT budget_categories_frequency_check
+  CHECK (frequency IS NULL OR frequency IN ('weekly','biweekly','semimonthly','monthly'));
+
+ALTER TABLE budget_categories DROP CONSTRAINT IF EXISTS budget_categories_frequency_fixed_only_check;
+ALTER TABLE budget_categories ADD CONSTRAINT budget_categories_frequency_fixed_only_check
+  CHECK (frequency IS NULL OR allocation_type = 'fixed');
 
 CREATE TABLE IF NOT EXISTS budget_allocations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
