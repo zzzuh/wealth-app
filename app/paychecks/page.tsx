@@ -7,6 +7,8 @@ import PaycheckForm from "./PaycheckForm";
 import PayScheduleForm from "./PayScheduleForm";
 import EditPaycheckButton from "./EditPaycheckButton";
 import DeletePaycheckButton from "./DeletePaycheckButton";
+import EditPayScheduleButton from "./EditPayScheduleButton";
+import DeletePayScheduleButton from "./DeletePayScheduleButton";
 
 interface PaySchedule {
   id: string;
@@ -63,6 +65,7 @@ export default async function PaychecksPage() {
                 <th className={th}>Net amount</th>
                 <th className={th}>Next pay date</th>
                 <th className={th}>Active</th>
+                <th className={th} />
               </tr>
             </thead>
             <tbody>
@@ -72,11 +75,17 @@ export default async function PaychecksPage() {
                   <td className={td}>{formatCurrency(s.net_amount)}</td>
                   <td className={tdMuted}>{formatDate(s.next_pay_date)}</td>
                   <td className={tdMuted}>{s.active ? "Yes" : "No"}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex justify-end gap-4">
+                      <EditPayScheduleButton schedule={s} />
+                      <DeletePayScheduleButton id={s.id} frequency={s.frequency} />
+                    </div>
+                  </td>
                 </tr>
               ))}
               {schedulesResult.rows.length === 0 && (
                 <tr>
-                  <td colSpan={4} className={emptyRow}>
+                  <td colSpan={5} className={emptyRow}>
                     No pay schedule set yet.
                   </td>
                 </tr>

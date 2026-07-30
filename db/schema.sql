@@ -29,6 +29,12 @@ CREATE TABLE IF NOT EXISTS paychecks (
   UNIQUE (user_id, pay_date)
 );
 
+-- Deleting a pay schedule shouldn't be blocked by (or destroy) paychecks
+-- already generated under it — just detach them.
+ALTER TABLE paychecks DROP CONSTRAINT IF EXISTS paychecks_pay_schedule_id_fkey;
+ALTER TABLE paychecks ADD CONSTRAINT paychecks_pay_schedule_id_fkey
+  FOREIGN KEY (pay_schedule_id) REFERENCES pay_schedules(id) ON DELETE SET NULL;
+
 CREATE TABLE IF NOT EXISTS budget_categories (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES users(id) ON DELETE CASCADE,
