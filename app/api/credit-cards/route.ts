@@ -24,17 +24,22 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   const userId = await requireUserId();
-  const { nickname, issuer, last_four, autopay_enabled, autopay_type } = await request.json();
+  const { nickname, issuer, last_four, autopay_enabled, autopay_type, due_day } = await request.json();
 
   if (!nickname) {
     return NextResponse.json({ error: "nickname is required" }, { status: 400 });
   }
 
+  const dueDay = due_day == null || due_day === "" ? null : Number(due_day);
+  if (dueDay !== null && (!Number.isInteger(dueDay) || dueDay < 1 || dueDay > 31)) {
+    return NextResponse.json({ error: "due_day must be a whole number between 1 and 31" }, { status: 400 });
+  }
+
   const result = await query(
-    `INSERT INTO credit_cards (user_id, nickname, issuer, last_four, autopay_enabled, autopay_type)
-     VALUES ($1, $2, $3, $4, $5, $6)
+    `INSERT INTO credit_cards (user_id, nickname, issuer, last_four, autopay_enabled, autopay_type, due_day)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)
      RETURNING *`,
-    [userId, nickname, issuer ?? null, last_four ?? null, autopay_enabled ?? false, autopay_type ?? null]
+    [userId, nickname, issuer ?? null, last_four ?? null, autopay_enabled ?? false, autopay_type ?? null, dueDay]
   );
   return NextResponse.json(result.rows[0], { status: 201 });
 }

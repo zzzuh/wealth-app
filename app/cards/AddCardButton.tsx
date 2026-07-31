@@ -3,37 +3,32 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Modal from "../components/Modal";
-import { input, buttonPrimary, errorText, label, buttonSecondary } from "@/lib/ui";
+import { input, buttonPrimary, buttonSecondary, buttonAdd, errorText, label } from "@/lib/ui";
 
-interface Card {
-  id: string;
-  nickname: string;
-  issuer: string | null;
-  last_four: string | null;
-  due_day: number | null;
-  autopay_enabled: boolean;
-  autopay_type: string | null;
-}
-
-export default function EditCardButton({ card }: { card: Card }) {
+export default function AddCardButton() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [nickname, setNickname] = useState(card.nickname);
-  const [issuer, setIssuer] = useState(card.issuer ?? "");
-  const [lastFour, setLastFour] = useState(card.last_four ?? "");
-  const [dueDay, setDueDay] = useState(card.due_day == null ? "" : String(card.due_day));
-  const [autopayEnabled, setAutopayEnabled] = useState(card.autopay_enabled);
-  const [autopayType, setAutopayType] = useState(card.autopay_type ?? "minimum");
+  const [nickname, setNickname] = useState("");
+  const [issuer, setIssuer] = useState("");
+  const [lastFour, setLastFour] = useState("");
+  const [dueDay, setDueDay] = useState("");
+  const [autopayEnabled, setAutopayEnabled] = useState(false);
+  const [autopayType, setAutopayType] = useState("minimum");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  function close() {
+    setOpen(false);
+    setError(null);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitting(true);
     setError(null);
 
-    const res = await fetch(`/api/credit-cards/${card.id}`, {
-      method: "PATCH",
+    const res = await fetch("/api/credit-cards", {
+      method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         nickname,
@@ -49,20 +44,26 @@ export default function EditCardButton({ card }: { card: Card }) {
 
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      setError(data.error ?? "Failed to save card");
+      setError(data.error ?? "Failed to add card");
       return;
     }
 
-    setOpen(false);
+    setNickname("");
+    setIssuer("");
+    setLastFour("");
+    setDueDay("");
+    setAutopayEnabled(false);
+    setAutopayType("minimum");
+    close();
     router.refresh();
   }
 
   return (
     <>
-      <button onClick={() => setOpen(true)} className={buttonSecondary}>
-        Edit
+      <button onClick={() => setOpen(true)} className={buttonAdd} aria-label="Add card">
+        +
       </button>
-      <Modal open={open} onClose={() => setOpen(false)} title="Edit card">
+      <Modal open={open} onClose={close} title="Add card">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex flex-col gap-1.5">
             <label className={label}>Nickname</label>
@@ -70,6 +71,7 @@ export default function EditCardButton({ card }: { card: Card }) {
               required
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
+              placeholder="Chase Sapphire Reserve"
               className={`w-full ${input}`}
             />
           </div>
@@ -101,9 +103,7 @@ export default function EditCardButton({ card }: { card: Card }) {
               placeholder="15"
               className={`w-full ${input}`}
             />
-            <p className="text-xs text-slate-400">
-              Only prefills new statements — statements already recorded keep their due dates.
-            </p>
+            <p className="text-xs text-slate-400">Day of the month this card bills. Prefills new statements.</p>
           </div>
 
           <label className="flex items-center gap-2 text-sm text-slate-600">
@@ -119,7 +119,11 @@ export default function EditCardButton({ card }: { card: Card }) {
           {autopayEnabled && (
             <div className="flex flex-col gap-1.5">
               <label className={label}>Autopay type</label>
-              <select value={autopayType} onChange={(e) => setAutopayType(e.target.value)} className={`w-full ${input}`}>
+              <select
+                value={autopayType}
+                onChange={(e) => setAutopayType(e.target.value)}
+                className={`w-full ${input}`}
+              >
                 <option value="minimum">Minimum</option>
                 <option value="statement_balance">Statement balance</option>
                 <option value="full_balance">Full balance</option>
@@ -130,11 +134,11 @@ export default function EditCardButton({ card }: { card: Card }) {
           {error && <p className={errorText}>{error}</p>}
 
           <div className="flex justify-end gap-4">
-            <button type="button" onClick={() => setOpen(false)} className={buttonSecondary}>
+            <button type="button" onClick={close} className={buttonSecondary}>
               Cancel
             </button>
             <button type="submit" disabled={submitting} className={buttonPrimary}>
-              {submitting ? "Saving..." : "Save"}
+              {submitting ? "Adding..." : "Add card"}
             </button>
           </div>
         </form>

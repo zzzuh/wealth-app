@@ -2,9 +2,9 @@ import { query } from "@/lib/db";
 import { requireUserId } from "@/lib/current-user";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { pageTitle, pageSubtitle, sectionLabel, tableWrap, th, td, tdMuted, tr, emptyRow, pill } from "@/lib/ui";
-import CardForm from "./CardForm";
-import StatementForm from "./StatementForm";
-import MarkPaidButton from "./MarkPaidButton";
+import AddCardButton from "./AddCardButton";
+import AddStatementButton from "./AddStatementButton";
+import TogglePaidButton from "./TogglePaidButton";
 import EditCardButton from "./EditCardButton";
 import DeleteCardButton from "./DeleteCardButton";
 
@@ -13,6 +13,7 @@ interface Card {
   nickname: string;
   issuer: string | null;
   last_four: string | null;
+  due_day: number | null;
   autopay_enabled: boolean;
   autopay_type: string | null;
 }
@@ -52,7 +53,10 @@ export default async function CardsPage() {
       </div>
 
       <section className="space-y-4">
-        <h2 className={sectionLabel}>Cards</h2>
+        <div className="flex items-center gap-2">
+          <h2 className={sectionLabel}>Cards</h2>
+          <AddCardButton />
+        </div>
         <div className={tableWrap}>
           <table className="w-full">
             <thead>
@@ -60,6 +64,7 @@ export default async function CardsPage() {
                 <th className={th}>Nickname</th>
                 <th className={th}>Issuer</th>
                 <th className={th}>Last 4</th>
+                <th className={th}>Due day</th>
                 <th className={th}>Autopay</th>
                 <th className={th} />
               </tr>
@@ -70,6 +75,7 @@ export default async function CardsPage() {
                   <td className={td}>{c.nickname}</td>
                   <td className={tdMuted}>{c.issuer ?? "—"}</td>
                   <td className={tdMuted}>{c.last_four ?? "—"}</td>
+                  <td className={tdMuted}>{c.due_day ?? "—"}</td>
                   <td className={tdMuted}>{c.autopay_enabled ? c.autopay_type ?? "on" : "off"}</td>
                   <td className="px-4 py-3">
                     <div className="flex justify-end gap-4">
@@ -81,7 +87,7 @@ export default async function CardsPage() {
               ))}
               {cardsResult.rows.length === 0 && (
                 <tr>
-                  <td colSpan={5} className={emptyRow}>
+                  <td colSpan={6} className={emptyRow}>
                     No cards yet.
                   </td>
                 </tr>
@@ -89,11 +95,13 @@ export default async function CardsPage() {
             </tbody>
           </table>
         </div>
-        <CardForm />
       </section>
 
       <section className="space-y-4">
-        <h2 className={sectionLabel}>Statements</h2>
+        <div className="flex items-center gap-2">
+          <h2 className={sectionLabel}>Statements</h2>
+          <AddStatementButton cards={cardsResult.rows} />
+        </div>
         <div className={tableWrap}>
           <table className="w-full">
             <thead>
@@ -118,7 +126,9 @@ export default async function CardsPage() {
                       {s.paid ? "Paid" : "Unpaid"}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-right">{!s.paid && <MarkPaidButton id={s.id} />}</td>
+                  <td className="px-4 py-3 text-right">
+                    <TogglePaidButton id={s.id} paid={s.paid} />
+                  </td>
                 </tr>
               ))}
               {statementsResult.rows.length === 0 && (
@@ -131,7 +141,6 @@ export default async function CardsPage() {
             </tbody>
           </table>
         </div>
-        <StatementForm cards={cardsResult.rows} />
       </section>
     </div>
   );

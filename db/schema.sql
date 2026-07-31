@@ -110,6 +110,15 @@ CREATE TABLE IF NOT EXISTS credit_cards (
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
+-- Statements bill on the same day every month, so the billing day belongs to
+-- the card, not to each statement. It only prefills the add-statement form —
+-- the resolved due_date is still snapshotted per statement, so changing this
+-- never rewrites statements already recorded.
+ALTER TABLE credit_cards ADD COLUMN IF NOT EXISTS due_day INT;
+ALTER TABLE credit_cards DROP CONSTRAINT IF EXISTS credit_cards_due_day_check;
+ALTER TABLE credit_cards ADD CONSTRAINT credit_cards_due_day_check
+  CHECK (due_day IS NULL OR (due_day BETWEEN 1 AND 31));
+
 CREATE TABLE IF NOT EXISTS card_statements (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   card_id UUID REFERENCES credit_cards(id) ON DELETE CASCADE,

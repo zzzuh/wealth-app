@@ -17,6 +17,10 @@ export const buttonGhostSuccess = "text-xs text-slate-400 transition-colors hove
 
 export const link = "text-sm text-slate-400 transition-colors hover:text-slate-900";
 
+// Small "+" affordance that sits next to a sectionLabel heading.
+export const buttonAdd =
+  "flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-sm leading-none text-slate-400 transition-colors hover:bg-slate-900 hover:text-white";
+
 export const errorText = "text-sm text-red-600";
 
 export const pageTitle = "text-xl font-semibold tracking-tight text-slate-900";
